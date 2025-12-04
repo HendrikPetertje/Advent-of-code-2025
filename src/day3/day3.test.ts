@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { getDayData } from '../utils/getDayData';
 import { getHighestJoltageChainofNum } from './day3';
 
-describe('Advent of code - Day 2', () => {
+describe('Advent of code - Day 3', () => {
   describe('Part 1', () => {
     it('should pass the dummy test', async () => {
       const input = await getDayData(3, true);

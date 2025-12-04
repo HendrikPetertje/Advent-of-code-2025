@@ -11,6 +11,8 @@ export const getHighestJoltageChainofNum = (
   return voltages.reduce((acc, curr) => acc + curr, 0);
 };
 
+// Support functions
+
 const parseInput = (input: string) => {
   return input
     .trim()

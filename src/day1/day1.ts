@@ -49,6 +49,8 @@ export const day1_2_getAmountofAll0Passes = (input: string) => {
   return counter;
 };
 
+// Support functions
+
 const parseInput = (input: string) => {
   return input.split('\n').map((line) => {
     const match = line.match(/^([LR])(\d+)$/);

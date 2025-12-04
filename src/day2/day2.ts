@@ -18,6 +18,8 @@ export const getInvalidIds = (input: string, atLeastTwice?: boolean) => {
   return sum;
 };
 
+// Support functions
+
 const parseData = (input: string) => {
   const items = input.split(',');
   const ranges = items.map((item) => {
