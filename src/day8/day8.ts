@@ -50,38 +50,29 @@ export const findLastConnection = (input: string) => {
   const boxes = parseInput(input);
   const { pairs, pairIndices } = createPairs(boxes);
 
-  const unionFind = new UnionFind(boxes.length);
+  // Pre-sort all pairs to speed up iteration later on.
+  const sortedPairs = Array.from(pairs.entries()).sort((a, b) => a[1] - b[1]);
 
-  let minThreshold = 0;
+  // use unionfind again to merge overlapping groups
+  const unionFind = new UnionFind(boxes.length);
   let lastConnection: [number, number] | null = null;
+  // Track current pair index, so we can skip over pairs we already had
+  let currentPairIndex = 0;
 
   // Continue connecting until single circuit
-  while (unionFind.countComponents(boxes.length) > 1) {
-    let smallest: number | null = null;
-    let smallestPair: string | null = null;
-
-    // Find smallest distance greater than minThreshold
-    for (const [pair, distance] of pairs.entries()) {
-      if (
-        distance > minThreshold &&
-        (smallest === null || distance < smallest)
-      ) {
-        smallest = distance;
-        smallestPair = pair;
-      }
-    }
-
-    if (smallest === null || smallestPair === null) {
-      break;
-    }
-
-    minThreshold = smallest;
-    const connection = pairIndices.get(smallestPair)!;
+  while (
+    unionFind.countComponents(boxes.length) > 1 &&
+    currentPairIndex < sortedPairs.length
+  ) {
+    const [pairKey, _] = sortedPairs[currentPairIndex]!;
+    const connection = pairIndices.get(pairKey)!;
 
     // Try to make the connection
     if (unionFind.union(connection[0], connection[1])) {
       lastConnection = connection;
     }
+
+    currentPairIndex += 1;
   }
 
   if (!lastConnection) {
@@ -146,33 +137,13 @@ const getCLosestPairs = (
   pairs: Map<string, number>,
   pairIndices: Map<string, [number, number]>,
 ) => {
-  let minThreshold = 0;
-  const groups: Array<[number, number]> = [];
+  // convert all pairs to an array and sort them once
+  const sortedPairs = Array.from(pairs.entries()).sort((a, b) => a[1] - b[1]);
 
-  for (let i = 1; i <= maxConnections; i += 1) {
-    let smallest: number | null = null;
-    let smallestPair: string | null = null;
-
-    // Find smallest distance greater than minThreshold
-    // a for loop of loop is used here so we can break it
-    for (const [pair, distance] of pairs.entries()) {
-      if (
-        distance > minThreshold &&
-        (smallest === null || distance < smallest)
-      ) {
-        smallest = distance;
-        smallestPair = pair;
-      }
-    }
-
-    if (smallest === null || smallestPair === null) {
-      break;
-    }
-
-    minThreshold = smallest;
-    const connection = pairIndices.get(smallestPair)!;
-    groups.push(connection);
-  }
+  // take the first x maxConnections pairs
+  const groups = sortedPairs
+    .slice(0, maxConnections)
+    .map(([pairKey]) => pairIndices.get(pairKey)!);
 
   return groups;
 };

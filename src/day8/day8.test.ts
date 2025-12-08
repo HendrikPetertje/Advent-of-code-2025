@@ -9,14 +9,13 @@ describe('Advent of code - Day 8', () => {
 
       const result = countLightConnections(input, 10);
 
-      expect(result).toEqual(40); // Updated based on Euclidean distance
+      expect(result).toEqual(40);
     });
 
-    // this is super slow
-    it.skip('should pass the real test', async () => {
-      const input = await getDayData(8, false, true);
+    it('should pass the real test', async () => {
+      const input = await getDayData(8);
 
-      const result = countLightConnections(input); // Back to 1000 connections
+      const result = countLightConnections(input);
 
       expect(result).toEqual(52668);
     });
@@ -24,16 +23,15 @@ describe('Advent of code - Day 8', () => {
 
   describe('Part 2', () => {
     it('should pass the dummy test', async () => {
-      const input = await getDayData(8, true, true);
+      const input = await getDayData(8, true);
 
       const result = findLastConnection(input);
 
       expect(result).toEqual(25272);
     });
 
-    // this is super slow
-    it.skip('should pass the real test', async () => {
-      const input = await getDayData(8, false, true);
+    it('should pass the real test', async () => {
+      const input = await getDayData(8);
 
       const result = findLastConnection(input);
 
