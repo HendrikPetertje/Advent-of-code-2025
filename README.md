@@ -15,7 +15,6 @@ data/dayxx/data.txt - For the actual puzzle input
 During advent of code it might happen that descriptive puzzle input changes
 between part 1 and 2, when that happens I'll adjust the structure.
 
-
 To run all the tests
 
 ```sh
@@ -28,4 +27,14 @@ To run all the tests while coding
 bun test:watch
 ```
 
+To create days, execute:
 
+```
+./createDay.sh <day-number>
+```
+
+To download and spawn the data for a day only, execute:
+
+```
+./createDay.sh <day-number> true
+```

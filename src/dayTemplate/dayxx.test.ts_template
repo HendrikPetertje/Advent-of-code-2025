@@ -1,0 +1,24 @@
+import { describe, expect, it } from 'bun:test';
+import { getDayData } from '../utils/getDayData';
+
+describe('Advent of code - Day xx', () => {
+  describe('Part 1', () => {
+    it('should pass the dummy test', async () => {
+      const input = await getDayData(x, true);
+    });
+
+    it('should pass the real test', async () => {
+      const input = await getDayData(x);
+    });
+  });
+
+  describe('Part 2', () => {
+    it('should pass the dummy test', async () => {
+      const input = await getDayData(x, true);
+    });
+
+    it('should pass the real test', async () => {
+      const input = await getDayData(x);
+    });
+  });
+});

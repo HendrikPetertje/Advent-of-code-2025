@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test';
 import { getDayData } from '../utils/getDayData';
-import { countSplits, countUniquePaths } from './day7';
+import { countSplits, countUniquePaths } from './day07';
 
-describe('Advent of code - Day 7', () => {
+describe('Advent of code - Day 07', () => {
   describe('Part 1', () => {
     it('should pass the dummy test', async () => {
       const input = await getDayData(7, true);

@@ -3,9 +3,9 @@ import { getDayData } from '../utils/getDayData';
 import {
   day1_1_getAmountof0passes,
   day1_2_getAmountofAll0Passes,
-} from './day1';
+} from './day01';
 
-describe('Advent of code - Day 1', () => {
+describe('Advent of code - Day 01', () => {
   describe('Part 1', () => {
     it('should pass the dummy test', async () => {
       const input = await getDayData(1, true);
