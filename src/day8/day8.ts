@@ -42,6 +42,10 @@ export const countLightConnections = (input: string, maxConnections = 1000) => {
   return result;
 };
 
+/**
+ * - Create all pairs with distances
+ * - keep connecting smallest distance pairs until all boxes are connected
+ */
 export const findLastConnection = (input: string) => {
   const boxes = parseInput(input);
   const { pairs, pairIndices } = createPairs(boxes);
