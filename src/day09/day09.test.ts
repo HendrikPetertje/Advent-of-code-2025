@@ -30,12 +30,11 @@ describe('Advent of code - Day 09', () => {
       expect(result).toEqual(24);
     });
 
-    it.only('should pass the real test', async () => {
+    it('should pass the real test', async () => {
       const input = await getDayData(9);
 
       const result = getBiggestRectangleAreaWithGreenTiles(input);
-      expect(result).not.toEqual(92770);
-      console.log('Result: ', result);
+      expect(result).toEqual(1534043700);
     });
   });
 });
