@@ -34,6 +34,8 @@ export const getBiggestRectangleAreaWithGreenTiles = (input: string) => {
   for (let currentI = 0; currentI < candidates.length; currentI += 1) {
     const candidate = candidates[currentI]!;
     console.log('running ', currentI, candidate.size);
+    if (currentI < 21770) continue;
+
     if (
       isRectangleValid(
         candidate.tiles[0],
@@ -143,12 +145,24 @@ const isPointInPolygon = (
     currentI < polygon.length;
     previousI = currentI, currentI += 1
   ) {
-    const pi = polygon[currentI]!;
-    const pj = polygon[previousI]!;
+    const currentPolygon = polygon[currentI]!;
+    const previousPolygon = polygon[previousI]!;
+
+    const progress = (currentI / polygon.length) * 100;
+    if (currentI % Math.floor(polygon.length / 10) === 0) {
+      // if progress is divisible by 10%, log it
+      if (progress % 2 === 0 && progress >= 2) {
+        console.log(`Point in polygon progress: ${progress.toFixed(0)}%`);
+      }
+    }
 
     if (
-      pi.y > point.y !== pj.y > point.y &&
-      point.x < ((pj.x - pi.x) * (point.y - pi.y)) / (pj.y - pi.y) + pi.x
+      currentPolygon.y > point.y !== previousPolygon.y > point.y &&
+      point.x <
+        ((previousPolygon.x - currentPolygon.x) *
+          (point.y - currentPolygon.y)) /
+          (previousPolygon.y - currentPolygon.y) +
+          currentPolygon.x
     ) {
       inside = !inside;
     }
