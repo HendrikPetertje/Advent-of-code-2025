@@ -23,14 +23,14 @@ describe('Advent of code - Day 09', () => {
   });
 
   describe('Part 2', () => {
-    it.only('should pass the dummy test', async () => {
+    it('should pass the dummy test', async () => {
       const input = await getDayData(9, true);
 
       const result = getBiggestRectangleAreaWithGreenTiles(input);
       expect(result).toEqual(24);
     });
 
-    it('should pass the real test', async () => {
+    it.only('should pass the real test', async () => {
       const input = await getDayData(9);
 
       const result = getBiggestRectangleAreaWithGreenTiles(input);

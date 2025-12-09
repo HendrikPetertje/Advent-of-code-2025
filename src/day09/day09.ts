@@ -33,6 +33,7 @@ export const getBiggestRectangleAreaWithGreenTiles = (input: string) => {
 
   for (let currentI = 0; currentI < candidates.length; currentI += 1) {
     const candidate = candidates[currentI]!;
+    console.log('running ', currentI, candidate.size);
     if (
       isRectangleValid(
         candidate.tiles[0],
@@ -140,7 +141,7 @@ const isPointInPolygon = (
   for (
     let currentI = 0, previousI = polygon.length - 1;
     currentI < polygon.length;
-    previousI = currentI += 1
+    previousI = currentI, currentI += 1
   ) {
     const pi = polygon[currentI]!;
     const pj = polygon[previousI]!;
