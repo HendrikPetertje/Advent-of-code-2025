@@ -15,7 +15,6 @@
  *  - convert all target light patterns into bitmasks
  *  - convert buttons into integer masks that can later be used to affect the bitmasks
  * - use BFS to figure out the smallest buttons to press
- *
  */
 export const turnIndicatorLightsOn = (input: string) => {
   const parsedInput = parseInput(input);
@@ -24,6 +23,8 @@ export const turnIndicatorLightsOn = (input: string) => {
     // this variable provides the maximum number of different light states
     // 1 shifted by x positions where x is the number of lights
     // so for 3 lights we would have 8 different states
+    // I'm pushing that in to the array to make it super easy to track what I've already
+    // visited in my BFS
     const maxPossibleStates = 1 << instructionSet.config.length;
     const visitedStates = new Array<boolean>(maxPossibleStates).fill(false);
 
@@ -52,6 +53,68 @@ export const turnIndicatorLightsOn = (input: string) => {
 
   const result = shortestPresses.reduce((acc, presses) => presses + acc, 0);
   return result;
+};
+
+/**
+ * I thought part two would dive deeper into the whole bit-wise concept, or even BFS.
+ * but nope. the bits were not important and BFS is seriously outmatched for part 2 input :)
+ */
+export const fixJoltageSettings = (input: string) => {
+  const parsedInput = parseInput(input);
+
+  const stringifyJoltages = (joltages: number[]) => joltages.join(',');
+
+  const shortestPresses = parsedInput.map((instructionSet) => {
+    const startValues = new Array<number>(instructionSet.joltages.length).fill(
+      0,
+    );
+    const targetStringState = stringifyJoltages(instructionSet.joltages);
+
+    const visitedStringStates = new Set<string>();
+    const queue: { values: number[]; distance: number }[] = [];
+
+    queue.push({ values: startValues, distance: 0 });
+    visitedStringStates.add(stringifyJoltages(startValues));
+
+    while (queue.length > 0) {
+      const { values, distance } = queue.shift()!;
+
+      // If we have reached our configuration, return the distance
+      if (stringifyJoltages(values) === targetStringState) return distance;
+
+      // Pres each button and put the result (if valid) back into the queue
+      instructionSet.buttons.forEach((button) => {
+        const nextValues = [...values];
+        // little optimization here, break early if we have exceeded the state
+        let valid = true;
+
+        // Press the button
+        button.forEach((position) => {
+          // if earlier parts of this button press marked as invalid, return early
+          if (!valid) return;
+
+          nextValues[position]! += 1;
+          // If we have exceeded the allowed joltage, mark as invalid and block further looping
+          if (nextValues[position]! > instructionSet.joltages[position]!) {
+            valid = false;
+          }
+        });
+
+        if (!valid) return;
+
+        // wrap up and push to queue if needed
+        const nextStringState = stringifyJoltages(nextValues);
+        if (!visitedStringStates.has(nextStringState)) {
+          visitedStringStates.add(nextStringState);
+          queue.push({ values: nextValues, distance: distance + 1 });
+        }
+      });
+    }
+
+    throw new Error('Could not find the desired configuration');
+  });
+
+  return shortestPresses.reduce((acc, presses) => acc + presses, 0);
 };
 
 const parseInput = (input: string) => {
