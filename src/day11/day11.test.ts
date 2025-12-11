@@ -45,7 +45,7 @@ hhh: out
       const input = await getDayData(11);
 
       const result = getPossiblePaths(input, 'svr', ['fft', 'dac']);
-      expect(result).toBe(2);
+      expect(result).toBe(358458157650450);
     });
   });
 });

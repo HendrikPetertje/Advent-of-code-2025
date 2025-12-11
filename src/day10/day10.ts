@@ -56,65 +56,35 @@ export const turnIndicatorLightsOn = (input: string) => {
 };
 
 /**
- * I thought part two would dive deeper into the whole bit-wise concept, or even BFS.
- * but nope. the bits were not important and BFS is seriously outmatched for part 2 input :)
+ * Part 2 was an ass and a half. I first did BFS, then DFS, then i did weird stuff where i would try to opitimize that which failed.. But i think this works!.
+ * (though for part two it will take 15 minutes, number 165 in my input took 10 minutes alone!)
+ *
+ * This adapted DFS approach is special :p:
+ * - At each recursive step, we pick the joltage counter with the fewest available buttons that can affect it and remove the rest early
+ * - For the chosen counter, we generate ALL possible ways to distribute button presses that sum to the needed joltage
+ * - We use bitmasks to track which buttons are "consumed" at each level and can't be reused in deeper recursion
+ * - The combinationsSummingTo function generates "integer partitions" (all ways to break a number into parts)
+ * - We go back when a path leads to impossible states (negative joltages or unsatisfiable counters)
  */
 export const fixJoltageSettings = (input: string) => {
   const parsedInput = parseInput(input);
 
-  const stringifyJoltages = (joltages: number[]) => joltages.join(',');
-
-  const shortestPresses = parsedInput.map((instructionSet) => {
-    const startValues = new Array<number>(instructionSet.joltages.length).fill(
-      0,
+  const results = parsedInput.map((instructionSet) => {
+    // Create bitmask with all buttons available (all bits set to 1)
+    // If we have 3 buttons: (1 << 3) - 1 = 111 (in binary that would be 7)
+    const mask = (1 << instructionSet.buttons.length) - 1;
+    const result = dfsPart2(
+      [...instructionSet.joltages], // copy array to avoid mutations
+      mask,
+      instructionSet.buttons,
     );
-    const targetStringState = stringifyJoltages(instructionSet.joltages);
-
-    const visitedStringStates = new Set<string>();
-    const queue: { values: number[]; distance: number }[] = [];
-
-    queue.push({ values: startValues, distance: 0 });
-    visitedStringStates.add(stringifyJoltages(startValues));
-
-    while (queue.length > 0) {
-      const { values, distance } = queue.shift()!;
-
-      // If we have reached our configuration, return the distance
-      if (stringifyJoltages(values) === targetStringState) return distance;
-
-      // Pres each button and put the result (if valid) back into the queue
-      instructionSet.buttons.forEach((button) => {
-        const nextValues = [...values];
-        // little optimization here, break early if we have exceeded the state
-        let valid = true;
-
-        // Press the button
-        button.forEach((position) => {
-          // if earlier parts of this button press marked as invalid, return early
-          if (!valid) return;
-
-          nextValues[position]! += 1;
-          // If we have exceeded the allowed joltage, mark as invalid and block further looping
-          if (nextValues[position]! > instructionSet.joltages[position]!) {
-            valid = false;
-          }
-        });
-
-        if (!valid) return;
-
-        // wrap up and push to queue if needed
-        const nextStringState = stringifyJoltages(nextValues);
-        if (!visitedStringStates.has(nextStringState)) {
-          visitedStringStates.add(nextStringState);
-          queue.push({ values: nextValues, distance: distance + 1 });
-        }
-      });
+    if (!Number.isFinite(result)) {
+      throw new Error('No solution for this machine');
     }
-
-    throw new Error('Could not find the desired configuration');
+    return result;
   });
 
-  return shortestPresses.reduce((acc, presses) => acc + presses, 0);
+  return results.reduce((acc, val) => acc + val, 0);
 };
 
 const parseInput = (input: string) => {
@@ -154,4 +124,151 @@ const parseInput = (input: string) => {
 
     return { config, configBitmask, buttons, buttonInIntegerMasks, joltages };
   });
+};
+
+// Returns all m-length non-negative integer vectors that sum to n.
+const combinationsSummingTo = (m: number, n: number): number[][] => {
+  const results: number[][] = [];
+  const comb = new Array(m).fill(0);
+  comb[m - 1] = n;
+
+  while (true) {
+    results.push(comb.slice());
+
+    // Find rightmost nonzero value
+    let i = m - 1;
+    while (i >= 0 && comb[i] === 0) i--;
+
+    // no more combinations
+    if (i <= 0) break;
+
+    const v = comb[i];
+    comb[i] = 0;
+    comb[i - 1] += 1;
+    comb[m - 1] = v - 1;
+  }
+
+  return results;
+};
+
+/**
+ * Returns true if button index `i` is still available in bitmask.
+ */
+const isButtonAvailable = (i: number, mask: number): boolean => {
+  return (mask & (1 << i)) !== 0;
+};
+
+/**
+ * Main DFS solver for one machine.
+ * joltage: number[] of remaining required jolts
+ * mask: bitmask of available buttons (1 bit per button)
+ * buttons: array of buttons, where each button is an array of counter indices
+ */
+const dfsPart2 = (
+  joltage: number[],
+  mask: number,
+  buttons: number[][],
+): number => {
+  // Base case set all to 0
+  if (joltage.every((v) => v === 0)) {
+    return 0;
+  }
+
+  const numButtons = buttons.length;
+
+  // Choose the counter index `mini`
+  let mini = -1;
+  let minButtonCount = Infinity;
+  let bestJoltage = -1;
+
+  joltage.forEach((joltageValue, counterIndex) => {
+    if (joltageValue <= 0) return;
+
+    // count matching available buttons
+    const count = Array.from(
+      { length: numButtons },
+      (_, buttonIdx) => buttonIdx,
+    ).filter(
+      (buttonIdx) =>
+        isButtonAvailable(buttonIdx, mask) &&
+        buttons[buttonIdx]!.includes(counterIndex),
+    ).length;
+
+    // This will be handled after the loop
+    if (count === 0) return;
+
+    if (
+      count < minButtonCount ||
+      (count === minButtonCount && joltageValue > bestJoltage)
+    ) {
+      minButtonCount = count;
+      bestJoltage = joltageValue;
+      mini = counterIndex;
+    }
+  });
+
+  // Check if any counter has no available buttons
+  const hasUnsatisfiableCounter = joltage.some((joltageValue, counterIndex) => {
+    if (joltageValue <= 0) return false;
+    const count = Array.from(
+      { length: numButtons },
+      (_, buttonIdx) => buttonIdx,
+    ).filter(
+      (buttonIdx) =>
+        isButtonAvailable(buttonIdx, mask) &&
+        buttons[buttonIdx]!.includes(counterIndex),
+    ).length;
+    return count === 0;
+  });
+
+  if (hasUnsatisfiableCounter || mini === -1) return Infinity;
+
+  const needed = joltage[mini]!;
+
+  // Collect all matching buttons
+  const matchingButtons = Array.from(
+    { length: numButtons },
+    (_, buttonIdx) => buttonIdx,
+  ).filter(
+    (buttonIdx) =>
+      isButtonAvailable(buttonIdx, mask) && buttons[buttonIdx]!.includes(mini),
+  );
+
+  if (matchingButtons.length === 0) return Infinity;
+
+  let best = Infinity;
+
+  // Build new mask with matching buttons removed
+  const newMaskBase = matchingButtons.reduce(
+    (acc, buttonIdx) => acc & ~(1 << buttonIdx),
+    mask,
+  );
+
+  // Try all combinations of counts for these buttons (sum = needed)
+  combinationsSummingTo(matchingButtons.length, needed).forEach((counts) => {
+    const newJoltage = joltage.slice();
+
+    const isValidCombination = counts.every(
+      (pressCount, matchingButtonIndex) => {
+        if (pressCount === 0) return true;
+
+        const buttonIndex = matchingButtons[matchingButtonIndex]!;
+
+        return buttons[buttonIndex]!.every((affectedCounterIndex) => {
+          newJoltage[affectedCounterIndex]! -= pressCount;
+          return newJoltage[affectedCounterIndex]! >= 0;
+        });
+      },
+    );
+
+    if (!isValidCombination) return;
+
+    // Recurse
+    const result = dfsPart2(newJoltage, newMaskBase, buttons);
+    if (result !== Infinity) {
+      best = Math.min(best, needed + result);
+    }
+  });
+
+  return best;
 };

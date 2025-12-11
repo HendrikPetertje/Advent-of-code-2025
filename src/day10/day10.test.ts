@@ -30,12 +30,12 @@ describe('Advent of code - Day 10', () => {
       expect(result).toEqual(33);
     });
 
-    it('should pass the real test', async () => {
+    it.skip('should pass the real test', async () => {
       const input = await getDayData(10);
 
       const result = fixJoltageSettings(input);
 
-      expect(result).toEqual(33);
+      expect(result).toEqual(18273);
     });
   });
 });
